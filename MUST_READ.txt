@@ -1,0 +1,14 @@
+# Disclaimer
+
+1. Make sure all packages were installed, if not I mentioned them in requirements.txt
+
+2. Also check version number of existing packages, and the API won't work if there are any mismatches in version number.
+
+
+Steps to run: open cmd and enter following commands
+
+cd newsapi
+python main.py 
+
+
+Then go to http://127.0.0.1:5000/api/news
