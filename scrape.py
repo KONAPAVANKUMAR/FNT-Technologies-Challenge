@@ -8,7 +8,7 @@ url = 'https://www.indiatoday.in/world'
 html = requests.get(url).text
 soup = BeautifulSoup(html, 'html.parser')
 
-class News:
+class NewsItem:
     def __init__(self, title, description, imageUrl):
         self.title = title
         self.description = description
@@ -20,5 +20,5 @@ def getNewsList():
         imageUrl = item.find('img')['src']
         title = item.find('a').text
         description = item.find('p').text
-        news.append(News(title, description, imageUrl))
+        news.append(NewsItem(title, description, imageUrl))
     return news

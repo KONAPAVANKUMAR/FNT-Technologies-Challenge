@@ -2,46 +2,43 @@
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from scrape import getNewsList
+from flask_restless import APIManager
 
+# configuring db
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
 db = SQLAlchemy(app)
 
-
-class NewsModel(db.Model):
+# Declaring database schema
+class News(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(80))
-    description = db.Column(db.String(200))
-    imageUrl = db.Column(db.String(200))
+    title = db.Column(db.Unicode)
+    description = db.Column(db.Unicode)
+    imageUrl = db.Column(db.Unicode)
 
+# delete old news from database
+db.session.query(News).delete()
+db.session.commit()
 
-# cors headers
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    return response
+# Create the database tables.
+db.create_all()
 
-# delete existing data
-for news in NewsModel.query.all():
-    db.session.delete(news)
-    db.session.commit()
+# insert into news
+def insertNews(news):
+    new = News(title=news.title, description=news.description, imageUrl=news.imageUrl)
+    db.session.add(new)
 
+for news in getNewsList():
+    insertNews(news)
 
+# committing to db
+db.session.commit()
 
-# add data into newsmodel
-def add_news(title, description, imageUrl):
-    news = NewsModel(title=title, description=description, imageUrl=imageUrl)
-    db.session.add(news)
-    db.session.commit()
-
-# create table
-# db.create_all()
-
-add_news('test', 'test','test')
-# create api with flask restless
-from flask_restless import APIManager
+# Create the Flask-Restless API manager.
 manager = APIManager(app, flask_sqlalchemy_db=db)
-manager.create_api(NewsModel, methods=['GET', 'POST', 'DELETE', 'PUT'])
+
+# creating API with endpoint /api/news
+manager.create_api(News, methods=['GET'])
+
+# start the flask loop
 app.run(debug=True)
